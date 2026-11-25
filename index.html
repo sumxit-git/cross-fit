@@ -47,38 +47,44 @@ function render(){
  if(step<3){const q=questions[step];card.innerHTML=`<div class="progress-meta"><span>Question ${step+1} of 3</span><span>${Math.round((step/3)*100)}%</span></div><div class="progress"><span style="width:${Math.round(step/3*100)}%"></span></div><h3 class="question-title">${q.title}</h3><p class="question-hint">${q.hint}</p><div class="choices">${q.answers.map((a,i)=>`<button class="choice ${answers[step]===i?'selected':''}" type="button" data-answer="${i}"><span>${a}</span><span class="dot" aria-hidden="true"></span></button>`).join('')}</div>${step>0?'<button class="back" type="button" data-back>← Previous question</button>':''}`;
  card.querySelectorAll('[data-answer]').forEach(b=>b.addEventListener('click',()=>{answers[step]=Number(b.dataset.answer);if(step<2){step++;render()}else{step=3;render()}}));const back=card.querySelector('[data-back]');if(back)back.addEventListener('click',()=>{step--;render()});return;
  }
- const draft=makeDraft();card.innerHTML=`<h3 class="question-title">YOUR EXPERIENCE, YOUR WORDS</h3><p class="question-hint">Review Hinglish mein likha hai. Post karne se pehle apne experience ke hisaab se edit kar lo.</p><textarea class="draft" id="draft" aria-label="Your Hinglish review draft">${draft}</textarea><p class="copy-note">Sirf review text copy hoga. Feedback message aur link review mein add nahi honge.</p><button class="copy-button" id="copyButton" type="button"><span>Copy and post review ↗</span><small>${feedbackLine}</small></button><button class="back" type="button" data-restart>← Change my answers</button>`;
+ card.innerHTML=`<h3 class="question-title">YOUR EXPERIENCE, YOUR WORDS</h3><p class="question-hint">Apne actual visit ka ek detail likho. Draft Hinglish mein banega—post karne se pehle check aur edit kar lena.</p><label class="question-hint" for="realDetail">Aapke visit mein kya khaas hua?</label><textarea class="draft" id="realDetail" aria-label="Your real experience detail" placeholder="Jaise: trainer ne meri lifting form improve karne mein help ki..."></textarea><button class="copy-button" id="generateButton" type="button"><span>Make my Hinglish draft ↻</span></button><p class="copy-note" id="detailMessage" role="status"></p><div id="draftStage" hidden><label class="question-hint" for="draft">Apna review check aur edit karo</label><textarea class="draft" id="draft" aria-label="Your Hinglish review draft"></textarea><p class="copy-note">Sirf review text copy hoga. Feedback message/link review mein add nahi hoga.</p><button class="copy-button" id="copyButton" type="button"><span>Copy and post review ↗</span><small>${feedbackLine}</small></button></div><button class="back" type="button" data-restart>← Change my answers</button>`;
+ document.getElementById('generateButton').addEventListener('click',()=>{const detail=document.getElementById('realDetail').value.trim();const message=document.getElementById('detailMessage');if(detail.length<8){message.textContent='Apne real experience ka chhota sa detail likho (kam se kam 8 characters).';document.getElementById('realDetail').focus();return}document.getElementById('draft').value=makeDraft(detail);document.getElementById('draftStage').hidden=false;message.textContent='Draft ready hai. Sahi lage toh edit karke copy karo.'});
  document.getElementById('copyButton').addEventListener('click',copyAndOpen);card.querySelector('[data-restart]').addEventListener('click',()=>{step=0;render()});
 }
-function makeDraft(){
+function makeDraft(detail){
  const experience=['kaafi zabardast raha','achha aur consistent raha','theek-thaak raha','abhi thoda improvement maangta hai'][answers[0]??0];
  const trainers=['kaafi supportive aur motivating hain','friendly hain aur zaroorat par help karte hain','unka support theek-thaak laga','thoda aur support mile toh experience aur better ho sakta hai'][answers[1]??0];
  const environment=['gym ka environment clean, spacious aur energetic laga','overall setup comfortable aur workout-friendly laga','environment decent laga, aur improve karne ki scope bhi hai','cleanliness aur setup par thoda aur dhyaan diya ja sakta hai'][answers[2]??0];
  const openers=[
   `Cross Fit Veer mein mera workout experience ${experience}.`,
   `Cross Fit Veer visit kiya aur overall experience ${experience}.`,
-  `Gym kaafi time se try karna tha—Cross Fit Veer mein experience ${experience}.`,
-  `Workout ke liye Cross Fit Veer visit kiya, aur experience ${experience}.`,
-  `Cross Fit Veer mein training karke achha laga; mera experience ${experience}.`,
-  `Yahan workout karke overall feel ${experience}.`
+  `Workout ke liye Cross Fit Veer gaya; experience ${experience}.`,
+  `Yahan training karke laga ki experience ${experience}.`,
+  `Mera Cross Fit Veer ka visit ${experience} raha.`,
+  `Gym try kiya aur Cross Fit Veer mein mera experience ${experience}.`,
+  `Cross Fit Veer mein workout karne ka experience ${experience}.`,
+  `Aaj ke workout ke baad keh sakta hoon ki experience ${experience}.`
  ];
  const middles=[
-  `Trainers ${trainers}, aur ${environment}.`,
-  `${environment}. Trainers bhi ${trainers}.`,
-  `Mujhe yahan ke trainers ${trainers} lage; ${environment}.`,
-  `Training floor aur equipment ke saath ${environment}, aur trainers ${trainers}.`
+  `Mere visit ka ek detail: ${detail}. Trainers ${trainers}, aur ${environment}.`,
+  `${detail}. Ye cheez mere liye noticeable thi. Trainers ${trainers}, aur ${environment}.`,
+  `Visit ke dauraan ${detail}. Saath hi, trainers ${trainers} aur ${environment}.`,
+  `Ek personal observation: ${detail}. Trainers ${trainers}; ${environment}.`,
+  `${environment}. Mere visit mein ${detail}. Trainers bhi ${trainers}.`,
+  `Yahan ${detail}. Iske alawa, trainers ${trainers} aur ${environment}.`
  ];
  const closers=[
-  'Fitness routine ke liye is gym ko ek baar try kar sakte ho.',
-  'Overall, workout ke liye achhi jagah lagi—dobara aane ka mann hai.',
-  'Agar Jaipur mein gym dekh rahe ho, toh Cross Fit Veer consider karna.',
-  'Mere experience ke basis par, yahan workout karna worth trying hai.',
-  'Apne fitness goals ke liye yahan training lena ek achha option ho sakta hai.',
-  'Overall vibe achhi lagi; ek baar visit karke khud experience karna.'
+  'Ye mera personal experience tha.',
+  'Mere visit ka honest feedback yahi hai.',
+  'Aapka experience alag ho sakta hai; maine jo dekha woh share kiya.',
+  'Overall, ye meri visit ki sachchi impression hai.',
+  'Maine apne experience ke basis par ye feedback likha hai.',
+  'Bas apni visit ka experience share kiya.'
  ];
+ const choose=list=>list[Math.floor(Math.random()*list.length)];
  let draft='';let attempts=0;
- do{draft=`${openers[Math.floor(Math.random()*openers.length)]} ${middles[Math.floor(Math.random()*middles.length)]} ${closers[Math.floor(Math.random()*closers.length)]}`;attempts++}while(recentReviews.includes(draft)&&attempts<30);
- if(recentReviews.includes(draft))draft+=` ${Date.now().toString().slice(-4)}`;
+ do{draft=`${choose(openers)} ${choose(middles)} ${choose(closers)}`;attempts++}while(recentReviews.includes(draft)&&attempts<40);
+ if(recentReviews.includes(draft)){const extra=choose(["Ye detail meri apni visit se hai.","Ye meri visit ka ek personal note hai.","Ye feedback mere actual experience par based hai."]);draft+=` ${extra}`;}
  recentReviews.push(draft);if(recentReviews.length>40)recentReviews.shift();
  try{localStorage.setItem('veerRecentReviews',JSON.stringify(recentReviews))}catch(e){}
  return draft;
